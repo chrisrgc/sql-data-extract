@@ -52,10 +52,14 @@ namespace SQLScripterCore
             {
                 Directory.Delete(tablesDir, true);
             }
-           
 
-            // Disable foreign key constraint checks
-            File.AppendAllText(mainScriptPath, "EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"\r\n");
+
+            foreach (Table table in db.Tables)
+            {
+                // Disable foreign key constraint checks
+                File.AppendAllText(mainScriptPath, $"ALTER TABLE [{table.Name}] NOCHECK CONSTRAINT all\r\n");
+            }
+
             foreach (Table table in db.Tables)
             {
                 if (tables.Count==0 || tables.Any(x=>x.Equals(table.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -84,8 +88,12 @@ namespace SQLScripterCore
 
             File.AppendAllText(mainScriptPath, tableList.ToString());
 
-            // Re-enable foreign key constraint checks
-            File.AppendAllText(mainScriptPath, "EXEC sp_MSforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"");
+            foreach (Table table in db.Tables)
+            {
+                // Re-enable foreign key constraint checks
+                File.AppendAllText(mainScriptPath, $"ALTER TABLE [{table.Name}] WITH CHECK CHECK CONSTRAINT all\r\n");
+            }
+            
         }
     }
 }
